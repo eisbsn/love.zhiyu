@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>枳渔手绘小猫 · 你的黏人小伙伴</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #fef7e8;
+            background-image: radial-gradient(circle at 20% 30%, rgba(255,225,170,0.5) 2%, transparent 2.5%),
+                              radial-gradient(circle at 80% 70%, rgba(255,210,150,0.4) 1.5%, transparent 2%);
+            background-size: 55px 55px, 70px 70px;
+            font-family: 'Comic Neue', 'Comic Neue', 'Chalkboard SE', 'Comic Sans MS', 'cursive', 'Segoe UI Emoji';
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: manipulation;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 680px;
+            margin: 20px auto;
+            background: #fffef5;
+            border-radius: 80px 80px 70px 70px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.08), 0 0 0 8px #f7efd4, 0 0 0 12px #e8dbbc;
+            padding: 20px 22px 30px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            padding: 0 8px;
+        }
+        .level-box {
+            background: #fff0db;
+            border-radius: 60px;
+            padding: 6px 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #b7622c;
+            border: 2px solid #f0d2a3;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02), 0 3px 6px rgba(0,0,0,0.05);
+            font-family: monospace;
+        }
+        .level-box span {
+            font-size: 1.7rem;
+            font-weight: 800;
+            margin-right: 5px;
+            color: #da8542;
+        }
+        .name-badge {
+            background: #ffedd5;
+            border-radius: 50px;
+            padding: 5px 24px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #aa6232;
+            border: 2px solid #f3dcb2;
+            transform: rotate(-0.5deg);
+            letter-spacing: 1px;
+        }
+
+        .pet-area {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin: 10px 0 0px;
+            cursor: grab;
+            touch-action: none;
+        }
+        canvas {
+            width: 100%;
+            max-width: 520px;
+            height: auto;
+            background: #fffcf0;
+            border-radius: 90px;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.06), inset 0 1px 5px rgba(255,245,200,0.9);
+            cursor: pointer;
+            touch-action: none;
+            display: block;
+            margin: 0 auto;
+            transition: filter 0.08s ease;
+        }
+        .tip-text {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #c49462;
+            margin-top: 10px;
+            background: #fff5e6;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 6px 18px;
+            border-radius: 40px;
+        }
+
+        .bubble {
+            background: #fffff2;
+            backdrop-filter: blur(6px);
+            border: 3px solid #f0daaf;
+            border-radius: 48px 48px 48px 24px;
+            padding: 12px 22px;
+            margin: 18px 8px 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6e401c;
+            text-align: center;
+            transition: 0.12s ease;
+            box-shadow: 0 5px 0 #eedbba;
+            min-height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .emoji-big {
+            font-size: 2.1rem;
+        }
+
+        .food-shelf {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0 12px;
+            padding: 12px 8px;
+            background: #fef3e2;
+            border-radius: 100px;
+        }
+        .food-item {
+            background: white;
+            border-radius: 50px;
+            padding: 6px 16px;
+            font-size: 1.4rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 0 #dbbc8c;
+            cursor: pointer;
+            transition: 0.04s linear;
+            border: 1px solid #fae3b5;
+            font-weight: bold;
+        }
+        .food-item:active {
+            transform: scale(0.96);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin: 12px 0 8px;
+        }
+        .action-btn {
+            background: #fff5e8;
+            border: 2px solid #f5dbb1;
+            border-radius: 50px;
+            padding: 6px 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #ab6533;
+            cursor: pointer;
+            transition: 0.05s linear;
+        }
+        .action-btn:active {
+            transform: scale(0.96);
+            background: #faefdf;
+        }
+
+        footer {
+            font-size: 0.62rem;
+            text-align: center;
+            color: #d6ad7a;
+            margin-top: 18px;
+        }
+        @media (max-width: 550px) {
+            .food-item { font-size: 1.2rem; padding: 4px 12px; }
+            .bubble { font-size: 0.85rem; }
+            .name-badge { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="header-stats">
+        <div class="level-box">⭐ Lv.<span id="levelValue">1</span> / 365</div>
+        <div class="name-badge">🐈 枳渔 · 手绘小猫 🐈</div>
+    </div>
+
+    <div class="pet-area" style="position: relative;">
+        <canvas id="catCanvas" width="540" height="460" style="width:100%; height:auto; max-width:540px; aspect-ratio:540/460"></canvas>
+    </div>
+    <div class="tip-text">✨ 摸摸头(滑动) · 戳戳(点击) · 抱抱 · 点一下食物喂我 ✨</div>
+
+    <div class="bubble" id="bubbleBox">
+        <span class="emoji-big" id="bubbleEmoji">🌸</span>
+        <span id="bubbleText">你来啦～ 摸摸枳渔的脑袋吧！</span>
+    </div>
+
+    <!-- 食物区域，点击喂食 -->
+    <div class="food-shelf" id="foodShelf">
+        <div class="food-item" data-food="cheese" data-type="like">🧀 芝士</div>
+        <div class="food-item" data-food="cilantro" data-type="hate">🌿 香菜</div>
+        <div class="food-item" data-food="burger" data-type="like">🍔 汉堡</div>
+        <div class="food-item" data-food="ricecake" data-type="hate">🍡 年糕</div>
+        <div class="food-item" data-food="fries" data-type="like">🍟 薯条</div>
+        <div class="food-item" data-food="pie" data-type="hate">🥙 馅饼</div>
+        <div class="food-item" data-food="banana" data-type="like">🍌 香蕉</div>
+        <div class="food-item" data-food="beef" data-type="hate">🥩 牛肉</div>
+        <div class="food-item" data-food="snackmix" data-type="like">🍱 小吃拼盘</div>
+    </div>
+
+    <div class="action-buttons">
+        <div class="action-btn" id="hugBtn">🤗 抱抱枳渔</div>
+    </div>
+    <footer>💕 每天只升1级，互动多次也只算1天~ 今天互动过了就不会再升级，明天再来陪枳渔！</footer>
+</div>
+
+<script>
+    (function(){
+        // ========== 枳渔核心数据 ==========
+        let currentLevel = 1;
+        let lastInteractionDate = "";
+        let todayStr = getTodayStr();
+        let interactedToday = false;     
+        let angerLevel = 0;               
+        let emotion = "normal";           // normal, happy, angry, shy, eating, hate
+        let eyeOpen = true;
+        let blinkInterval;
+        
+        // 漂浮物系统
+        let floatingParticles = [];
+        let animationId = null;
+        let currentPetSpeed = 0;   // 抚摸速度影响漂浮物上升速度
+        
+        // canvas
+        const canvas = document.getElementById('catCanvas');
+        const ctx = canvas.getContext('2d');
+        const bubbleTextSpan = document.getElementById('bubbleText');
+        const bubbleEmojiSpan = document.getElementById('bubbleEmoji');
+        const levelSpan = document.getElementById('levelValue');
+        
+        // 互动冷却锁 (手指抬起再落下才新对话)
+        let canInteract = true;
+        let interactionCooldown = 420;
+        
+        // 辅助函数
+        function getTodayStr(){
+            const d = new Date();
+            return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+        }
+        
+        function loadGame(){
+            const savedLevel = localStorage.getItem("jimuyu_level");
+            const savedDate = localStorage.getItem("jimuyu_lastDate");
+            if(savedLevel) currentLevel = parseInt(savedLevel) || 1;
+            if(savedDate) lastInteractionDate = savedDate;
+            if(currentLevel>365) currentLevel=365;
+            if(currentLevel<1) currentLevel=1;
+            updateLevelUI();
+            if(lastInteractionDate === todayStr) interactedToday = true;
+            else interactedToday = false;
+        }
+        
+        function tryLevelUp(){
+            if(currentLevel >= 365) return false;
+            const nowDate = getTodayStr();
+            if(nowDate !== lastInteractionDate){
+                currentLevel++;
+                if(currentLevel>365) currentLevel=365;
+                lastInteractionDate = nowDate;
+                interactedToday = true;
+                saveGame();
+                updateLevelUI();
+                showBubbleWithEmoji("🎉✨", `枳渔升到 ${currentLevel} 级啦！尾巴摇成小螺旋桨～～`, 2800);
+                return true;
+            }
+            return false;
+        }
+        
+        function recordInteraction(){
+            if(!canInteract) return false;
+            canInteract = false;
+            setTimeout(() => { canInteract = true; }, interactionCooldown);
+            if(!interactedToday) tryLevelUp();
+            if(angerLevel > 0 && emotion !== "angry") angerLevel = Math.max(0, angerLevel-6);
+            return true;
+        }
+        
+        function saveGame(){
+            localStorage.setItem("jimuyu_level", currentLevel);
+            localStorage.setItem("jimuyu_lastDate", lastInteractionDate);
+        }
+        
+        function updateLevelUI(){
+            levelSpan.innerText = currentLevel;
+        }
+        
+        function showBubbleWithEmoji(emoji, text, duration=2400){
+            bubbleEmojiSpan.innerText = emoji;
+            bubbleTextSpan.innerText = text;
+            if(window.bubbleTimeout) clearTimeout(window.bubbleTimeout);
+            window.bubbleTimeout = setTimeout(()=>{
+                if(document.getElementById('bubbleText')){
+                    bubbleEmojiSpan.innerText = "🌸";
+                    bubbleTextSpan.innerText = "你来啦～ 摸摸枳渔的脑袋吧！";
+                }
+            }, duration);
+        }
+        
+        function setBubbleNow(emoji, text){
+            bubbleEmojiSpan.innerText = emoji;
+            bubbleTextSpan.innerText = text;
+            if(window.bubbleTimeout) clearTimeout(window.bubbleTimeout);
+        }
+        
+        // ========== 自然手绘风格小猫绘制 ==========
+        function drawCat(){
+            ctx.clearRect(0, 0, 540, 460);
+            ctx.save();
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            
+            // 根据情绪确定表情参数（无几何堆叠，全曲线）
+            let earYShift = 0;
+            let cheekBlush = false;
+            let angryBrow = 0;
+            let mouthType = "smile";
+            let eyeAngle = 0;
+            if(emotion === "happy"){
+                earYShift = -2;
+                cheekBlush = true;
+                angryBrow = -1;
+                mouthType = "bigsmile";
+            } else if(emotion === "angry"){
+                earYShift = 3;
+                angryBrow = 5;
+                mouthType = "angry";
+            } else if(emotion === "shy"){
+                cheekBlush = true;
+                earYShift = 1;
+                mouthType = "smile";
+            } else if(emotion === "eating"){
+                cheekBlush = true;
+                mouthType = "om";
+            } else if(emotion === "hate"){
+                angryBrow = 3;
+                mouthType = "yuck";
+            } else {
+                mouthType = "smile";
+            }
+            
+            // 身体 (流畅曲线)
+            ctx.beginPath();
+            ctx.moveTo(270, 290);
+            ctx.quadraticCurveTo(360, 270, 380, 320);
+            ctx.quadraticCurveTo(395, 365, 340, 380);
+            ctx.quadraticCurveTo(290, 395, 240, 390);
+            ctx.quadraticCurveTo(175, 380, 155, 335);
+            ctx.quadraticCurveTo(140, 285, 200, 270);
+            ctx.quadraticCurveTo(235, 260, 270, 290);
+            ctx.fillStyle = "#FCC28A";
+            ctx.fill();
+            // 肚子
+            ctx.beginPath();
+            ctx.moveTo(270, 305);
+            ctx.quadraticCurveTo(320, 300, 335, 335);
+            ctx.quadraticCurveTo(340, 365, 295, 372);
+            ctx.quadraticCurveTo(250, 378, 215, 365);
+            ctx.quadraticCurveTo(185, 350, 195, 325);
+            ctx.quadraticCurveTo(205, 300, 270, 305);
+            ctx.fillStyle = "#FFE2BF";
+            ctx.fill();
+            
+            // 头部
+            ctx.beginPath();
+            ctx.moveTo(270, 150);
+            ctx.quadraticCurveTo(330, 140, 360, 175);
+            ctx.quadraticCurveTo(395, 215, 375, 255);
+            ctx.quadraticCurveTo(360, 290, 310, 295);
+            ctx.quadraticCurveTo(270, 298, 230, 295);
+            ctx.quadraticCurveTo(180, 290, 165, 255);
+            ctx.quadraticCurveTo(145, 215, 180, 175);
+            ctx.quadraticCurveTo(210, 140, 270, 150);
+            ctx.fillStyle = "#FCC28A";
+            ctx.fill();
+            
+            // 耳朵（与头部自然衔接）
+            ctx.beginPath();
+            ctx.moveTo(195, 160+earYShift);
+            ctx.quadraticCurveTo(175, 110+earYShift, 155, 135+earYShift);
+            ctx.quadraticCurveTo(145, 155+earYShift, 180, 170+earYShift);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(345, 160+earYShift);
+            ctx.quadraticCurveTo(365, 110+earYShift, 385, 135+earYShift);
+            ctx.quadraticCurveTo(395, 155+earYShift, 360, 170+earYShift);
+            ctx.fill();
+            ctx.fillStyle = "#FCD7AC";
+            ctx.beginPath();
+            ctx.moveTo(186, 158+earYShift);
+            ctx.quadraticCurveTo(172, 127+earYShift, 163, 145+earYShift);
+            ctx.quadraticCurveTo(158, 158+earYShift, 180, 168+earYShift);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(354, 158+earYShift);
+            ctx.quadraticCurveTo(368, 127+earYShift, 377, 145+earYShift);
+            ctx.quadraticCurveTo(382, 158+earYShift, 360, 168+earYShift);
+            ctx.fill();
+            
+            // 眼睛
+            ctx.fillStyle = "#34201A";
+            if(eyeOpen){
+                ctx.beginPath(); ctx.ellipse(228, 200, 15, 19, -0.1, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.ellipse(312, 200, 15, 19, 0.1, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#FFFEF2";
+                ctx.beginPath(); ctx.arc(222, 193, 4.8, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(306, 193, 4.8, 0, Math.PI*2); ctx.fill();
+            } else {
+                ctx.beginPath(); ctx.moveTo(213, 200); ctx.quadraticCurveTo(228, 192, 243, 200); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(297, 200); ctx.quadraticCurveTo(312, 192, 327, 200); ctx.stroke();
+                ctx.lineWidth = 3; ctx.strokeStyle = "#34201A";
+            }
+            
+            // 眉毛（开心时扬起，生气时紧皱）
+            ctx.lineWidth = 3.8;
+            ctx.strokeStyle = "#6E3E24";
+            if(emotion === "happy"){
+                ctx.beginPath(); ctx.moveTo(212, 165); ctx.quadraticCurveTo(228, 152, 244, 162); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(296, 162); ctx.quadraticCurveTo(312, 152, 328, 165); ctx.stroke();
+            } else if(emotion === "angry" || emotion === "hate"){
+                let offset = (emotion === "angry") ? 6 : 3;
+                ctx.beginPath(); ctx.moveTo(212, 168+offset); ctx.quadraticCurveTo(228, 178+offset, 244, 168+offset); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(296, 168+offset); ctx.quadraticCurveTo(312, 178+offset, 328, 168+offset); ctx.stroke();
+                // 增加怒纹
+                ctx.beginPath(); ctx.moveTo(205, 175+offset); ctx.lineTo(215, 180+offset); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(335, 175+offset); ctx.lineTo(325, 180+offset); ctx.stroke();
+            } else {
+                ctx.beginPath(); ctx.moveTo(212, 168); ctx.quadraticCurveTo(228, 160, 244, 168); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(296, 168); ctx.quadraticCurveTo(312, 160, 328, 168); ctx.stroke();
+            }
+            
+            // 腮红
+            if(cheekBlush){
+                ctx.fillStyle = "#FFB89A"; ctx.globalAlpha = 0.5;
+                ctx.beginPath(); ctx.ellipse(192, 225, 13, 9, 0, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.ellipse(348, 225, 13, 9, 0, 0, Math.PI*2); ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+            
+            // 嘴巴
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#965E38";
+            ctx.fillStyle = "#D57A4A";
+            if(mouthType === "smile"){
+                ctx.beginPath(); ctx.arc(270, 238, 22, 0.1, Math.PI - 0.1); ctx.stroke();
+            } else if(mouthType === "bigsmile"){
+                ctx.beginPath(); ctx.arc(270, 242, 28, 0.05, Math.PI - 0.05); ctx.stroke();
+                ctx.fillStyle = "#E86840";
+                ctx.beginPath(); ctx.ellipse(270, 254, 9, 7, 0, 0, Math.PI*2); ctx.fill();
+            } else if(mouthType === "angry"){
+                ctx.beginPath(); ctx.arc(270, 250, 23, Math.PI+0.15, Math.PI*2-0.15, true); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(253, 232); ctx.lineTo(265, 239); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(287, 232); ctx.lineTo(275, 239); ctx.stroke();
+            } else if(mouthType === "om"){
+                ctx.fillStyle = "#C35E38";
+                ctx.beginPath(); ctx.ellipse(270, 250, 14, 12, 0, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "white";
+                ctx.beginPath(); ctx.arc(266, 246, 3, 0, Math.PI*2); ctx.fill();
+            } else if(mouthType === "yuck"){
+                ctx.beginPath(); ctx.moveTo(252, 240); ctx.lineTo(262, 250); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(288, 240); ctx.lineTo(278, 250); ctx.stroke();
+                ctx.beginPath(); ctx.arc(270, 258, 10, 0, Math.PI, true); ctx.stroke();
+            }
+            
+            // 胡须
+            ctx.beginPath(); ctx.moveTo(170, 213); ctx.quadraticCurveTo(135, 205, 115, 210); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(170, 228); ctx.quadraticCurveTo(135, 228, 110, 233); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(370, 213); ctx.quadraticCurveTo(405, 205, 425, 210); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(370, 228); ctx.quadraticCurveTo(405, 228, 430, 233); ctx.stroke();
+            
+            // 尾巴
+            ctx.beginPath(); ctx.moveTo(420, 340); ctx.quadraticCurveTo(455, 320, 475, 290);
+            ctx.quadraticCurveTo(500, 260, 490, 240); ctx.lineWidth = 18; ctx.strokeStyle = "#FCC28A"; ctx.stroke();
+            ctx.lineWidth = 8; ctx.strokeStyle = "#FBC07A";
+            ctx.beginPath(); ctx.moveTo(420, 338); ctx.quadraticCurveTo(455, 318, 475, 288);
+            ctx.quadraticCurveTo(498, 258, 488, 242); ctx.stroke();
+            ctx.restore();
+        }
+        
+        // 漂浮物系统（手绘风格爱心/太阳/彩虹/💢）
+        function addFloatingParticle(type, baseSpeedY = 1.2){
+            let x = 180 + Math.random() * 200;
+            let y = canvas.offsetTop ? 350 : 320;
+            let speedY = baseSpeedY + Math.random() * 1.5;
+            floatingParticles.push({ x, y, type, speedY, life: 1 });
+        }
+        
+        function updateFloatingParticles(speedFactor = 1.0){
+            for(let i=0; i<floatingParticles.length; i++){
+                let p = floatingParticles[i];
+                p.y -= p.speedY * speedFactor;
+                p.life -= 0.008;
+                if(p.y < 50 || p.life <= 0){
+                    floatingParticles.splice(i,1);
+                    i--;
+                }
+            }
+        }
+        
+        function drawFloatingParticles(){
+            for(let p of floatingParticles){
+                ctx.save();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = Math.min(1, p.life * 1.2);
+                if(p.type === 'heart'){
+                    ctx.fillStyle = "#FF8DA1";
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.quadraticCurveTo(p.x-5, p.y-6, p.x, p.y-10);
+                    ctx.quadraticCurveTo(p.x+5, p.y-6, p.x, p.y);
+                    ctx.fill();
+                    ctx.fillStyle = "#FF5E7E";
+                    ctx.beginPath();
+                    ctx.moveTo(p.x+2, p.y-2);
+                    ctx.quadraticCurveTo(p.x, p.y-6, p.x-2, p.y-2);
+                    ctx.fill();
+                } else if(p.type === 'sun'){
+                    ctx.fillStyle = "#FFD966";
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill();
+                    for(let i=0;i<8;i++){
+                        let angle = i*Math.PI*2/8;
+                        let dx = Math.cos(angle)*11;
+                        let dy = Math.sin(angle)*11;
+                        ctx.beginPath(); ctx.moveTo(p.x+dx*0.6, p.y+dy*0.6); ctx.lineTo(p.x+dx, p.y+dy); ctx.lineWidth = 2.5; ctx.stroke();
+                    }
+                } else if(p.type === 'rainbow'){
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 12, 0, Math.PI, true);
+                    ctx.strokeStyle = "#FFB347"; ctx.lineWidth = 2.5; ctx.stroke();
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 9, 0, Math.PI, true);
+                    ctx.strokeStyle = "#FFD966"; ctx.stroke();
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI, true);
+                    ctx.strokeStyle = "#A5D6A5"; ctx.stroke();
+                } else if(p.type === 'anger'){
+                    ctx.fillStyle = "#E63946";
+                    ctx.font = `bold ${18}px "Segoe UI Emoji"`;
+                    ctx.fillText("💢", p.x-8, p.y-5);
+                }
+                ctx.restore();
+            }
+        }
+        
+        function animateFloating(speedFactor){
+            updateFloatingParticles(speedFactor);
+            drawCat();
+            drawFloatingParticles();
+            requestAnimationFrame(() => animateFloating(speedFactor));
+        }
+        
+        // 表情设置与漂浮物触发
+        function setEmotionWithEffect(newEmo, extraSpeed = 1.0){
+            emotion = newEmo;
+            drawCat();
+            if(newEmo === "happy"){
+                for(let i=0;i<4+Math.floor(Math.random()*3);i++){
+                    let r = Math.random();
+                    if(r<0.5) addFloatingParticle('heart', 0.8+Math.random()*0.8);
+                    else if(r<0.8) addFloatingParticle('sun', 0.7);
+                    else addFloatingParticle('rainbow', 0.6);
+                }
+            } else if(newEmo === "angry" || newEmo === "hate"){
+                for(let i=0;i<5+Math.floor(Math.random()*4);i++){
+                    addFloatingParticle('anger', 1.0+Math.random());
+                }
+            }
+        }
+        
+        // 互动库
+        const petTexts = ["你摸摸头～枳渔耳朵酥酥的", "再摸一下嘛！脑袋暖暖的", "你的手心好温柔呀", "呼噜噜～ 最喜欢被你摸了", "尾巴在偷偷画爱心～", "好幸福，想一直赖着你","摸摸好舒服，再一下下","被你摸头感觉像在晒太阳～"];
+        const pokeTexts = ["呜… 你居然戳我！😾", "哼！记一笔小账", "再戳我要生气啦！", "枳渔的肚子是战略储备！", "戳上瘾了是不是？", "你坏坏！(鼓起脸颊)", "我要告诉空气你戳我","轻轻的戳可以，太重会痛啦"];
+        const highAngerTexts = ["呜啊！！不要再戳啦！要炸毛了", "真·生气！需要芝士哄我", "哼！今天不想理你十秒钟","戳太多次了，枳渔不开心了＞︿＜"];
+        const hugTexts = ["抱紧紧～ 你的怀里好暖", "枳渔用尾巴圈住你了", "好幸福，不许松手", "最喜欢你了(超小声)", "像抱着一朵云～", "蹭蹭你，今天最开心的事","抱抱充电中... 充满啦！"];
+        const likeFoodReplies = ["嗷呜～超美味！你果然懂我❤️", "芝士拉丝～拉得越长越喜欢你！", "抱着美食打滚，我是小吃货~", "呜呜幸福到模糊", "这个可以天天吃嘛？", "分你一半！算了还是我自己吃吧", "你喂的东西最香啦","吧唧吧唧～ 再来一口！"];
+        const hateFoodReplies = ["不要！！快拿走啦😖", "这个绿绿的魔鬼...你喂我香菜？", "年糕黏牙好可怕", "馅饼奇奇怪怪，枳渔委屈", "牛肉不行！换香蕉好不好", "哼！你故意的对不对","唔… 不喜欢这个味道","挑食小猫拒绝食用！"];
+        
+        function performInteraction(interactionType, callbackReply, emoji, newEmotion, angerDelta, customAnger, extraSpeed=1.0){
+            if(!recordInteraction()) return false;
+            if(customAnger) angerLevel = Math.max(0, Math.min(100, angerLevel + angerDelta));
+            else if(angerDelta !== undefined) angerLevel = Math.max(0, Math.min(100, angerLevel + angerDelta));
+            setEmotionWithEffect(newEmotion, extraSpeed);
+            let reply = "";
+            if(interactionType === 'poke' && angerLevel > 70){
+                reply = highAngerTexts[Math.floor(Math.random() * highAngerTexts.length)];
+            } else {
+                reply = callbackReply();
+            }
+            setBubbleNow(emoji, reply);
+            setTimeout(()=>{
+                if(emotion === newEmotion) {
+                    emotion = "normal";
+                    drawCat();
+                }
+            }, 1100);
+            return true;
+        }
+        
+        // 手势与抚摸速度检测（影响漂浮速度）
+        let lastMoveTime = 0;
+        let lastMoveX = 0;
+        let currentSpeedFactor = 1.0;
+        function updateSpeedFromMovement(){
+            let now = Date.now();
+            if(lastMoveTime && now - lastMoveTime < 150){
+                let dt = Math.max(30, now - lastMoveTime);
+                let speed = 180 / dt;
+                currentSpeedFactor = Math.min(2.5, Math.max(0.7, speed * 0.6));
+            } else {
+                currentSpeedFactor = 1.0;
+            }
+            lastMoveTime = now;
+        }
+        
+        // 抚摸交互：滑动时根据速度增加漂浮物上升速度系数
+        let pettingActive = false;
+        let lastPetEvent = 0;
+        canvas.addEventListener('touchmove', (e)=>{
+            e.preventDefault();
+            if(!canInteract) return;
+            if(!pettingActive){
+                pettingActive = true;
+                lastPetEvent = Date.now();
+            }
+            let now = Date.now();
+            let speedVal = Math.min(2.2, 600 / Math.max(50, now - lastPetEvent));
+            currentSpeedFactor = speedVal;
+            lastPetEvent = now;
+            if(!window._petCooldown){
+                window._petCooldown = true;
+                performInteraction('pet', ()=>petTexts[Math.floor(Math.random()*petTexts.length)], "😽💕", "happy", -12, null, currentSpeedFactor);
+                setTimeout(()=>{ window._petCooldown = false; }, 400);
+            }
+        });
+        canvas.addEventListener('touchend', ()=>{ pettingActive = false; currentSpeedFactor = 1.0; });
+        
+        let mousePet = false, mouseLast=0;
+        canvas.addEventListener('mousemove', (e)=>{
+            if(e.buttons === 1 && canInteract){
+                let now = Date.now();
+                let sp = Math.min(2.2, 600 / Math.max(50, now - mouseLast));
+                currentSpeedFactor = sp;
+                mouseLast = now;
+                if(!window._mousePetCD){
+                    window._mousePetCD = true;
+                    performInteraction('pet', ()=>petTexts[Math.floor(Math.random()*petTexts.length)], "🐱✨", "happy", -10, null, currentSpeedFactor);
+                    setTimeout(()=>{ window._mousePetCD = false; }, 400);
+                }
+            }
+        });
+        
+        canvas.addEventListener('click', (e)=>{
+            e.stopPropagation();
+            performInteraction('poke', ()=>pokeTexts[Math.floor(Math.random()*pokeTexts.length)], "😤👆", "angry", 22, null, 1);
+        });
+        
+        document.getElementById('hugBtn').addEventListener('click', ()=>{
+            performInteraction('hug', ()=>hugTexts[Math.floor(Math.random()*hugTexts.length)], "🥺🤗", "shy", -35, null, 1);
+        });
+        
+        // 喂食改为点击食物
+        const foodItems = document.querySelectorAll('.food-item');
+        foodItems.forEach(food=>{
+            food.addEventListener('click', (e)=>{
+                e.stopPropagation();
+                if(!canInteract) return;
+                let type = food.dataset.type;
+                let foodName = food.innerText.trim();
+                if(!recordInteraction()) return;
+                if(type === "like"){
+                    angerLevel = Math.max(0, angerLevel-18);
+                    setEmotionWithEffect("eating", 1);
+                    setBubbleNow("😋🍽️", likeFoodReplies[Math.floor(Math.random()*likeFoodReplies.length)]);
+                } else {
+                    angerLevel = Math.min(100, angerLevel+12);
+                    setEmotionWithEffect("hate", 1);
+                    setBubbleNow("🤢🚫", hateFoodReplies[Math.floor(Math.random()*hateFoodReplies.length)]);
+                }
+                setTimeout(()=>{ if(emotion==="eating"||emotion==="hate") { emotion="normal"; drawCat(); } }, 1300);
+            });
+        });
+        
+        // 闲谈
+        setInterval(()=>{
+            if(emotion === "normal" && Math.random()<0.18 && canInteract){
+                let talks = ["你今天会喂我芝士吗～", "尾巴在画圈圈，因为想你", "傲娇小猫在线等摸摸", "戳我可以，但要轻轻哒", "你不在的时候我跟小鱼干聊天了", "想和你一起发呆"];
+                setBubbleNow("🐱💬", talks[Math.floor(Math.random()*talks.length)]);
+                setTimeout(()=>{ if(emotion === "normal") setBubbleNow("🌸", "你来啦～ 摸摸枳渔的脑袋吧！"); }, 4200);
+            }
+        }, 14000);
+        
+        function blinkLoop(){
+            setInterval(()=>{
+                eyeOpen = false;
+                drawCat();
+                setTimeout(()=>{ eyeOpen = true; drawCat(); }, 140);
+            }, 3500);
+        }
+        
+        function startAnimation(){
+            function loop(){
+                let speed = currentSpeedFactor;
+                updateFloatingParticles(speed);
+                drawCat();
+                drawFloatingParticles();
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+        
+        function init(){
+            loadGame();
+            drawCat();
+            blinkLoop();
+            startAnimation();
+        }
+        init();
+    })();
+</script>
+</body>
+</html>
